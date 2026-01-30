@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Clientes</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 12px; background-color: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.3s; }
+        button:hover { background-color: #1d4ed8; }
+        #estado { margin-top: 15px; text-align: center; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Nuevo Cliente</h2>
+    <form id="formRegistro">
+        <input type="text" id="nombre" placeholder="Nombre completo" required>
+        <input type="text" id="dni" placeholder="DNI (sin puntos)" required>
+        <input type="text" id="localidad" placeholder="Localidad" required>
+        <button type="submit" id="btnRegistrar">Registrar Cliente</button>
+    </form>
+    <p id="estado"></p>
+</div>
+
+<script>
+    const form = document.getElementById('formRegistro');
+    const estado = document.getElementById('estado');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        estado.innerText = "Enviando...";
+        estado.style.color = "blue";
+
+        const nuevoCliente = {
+            nombre: document.getElementById('nombre').value,
+            dni: document.getElementById('dni').value,
+            localidad: document.getElementById('localidad').value
+        };
+
+        try {
+            // AJUSTE: Ahora apunta a /registrar de forma relativa
+            const url = '/registrar';
+            
+            const respuesta = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevoCliente)
+            });
+
+            if (respuesta.ok) {
+                estado.innerText = "¡Cliente guardado con éxito! 🚀";
+                estado.style.color = "green";
+                form.reset();
+            } else {
+                const errorData = await respuesta.json();
+                estado.innerText = "Error: " + (errorData.error || "No se pudo guardar");
+                estado.style.color = "red";
+            }
+        } catch (err) {
+            console.error(err);
+            estado.innerText = "Error de conexión con el servidor.";
+            estado.style.color = "red";
+        }
+    });
+</script>
+
+</body>
+</html>

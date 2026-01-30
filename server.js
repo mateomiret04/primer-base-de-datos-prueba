@@ -1,9 +1,14 @@
 const express = require('express');
 const { Pool } = require('pg');
+const cors = require('cors'); // AGREGADO: Importamos CORS
 require('dotenv').config();
 
 const app = express();
+
+// CONFIGURACIÓN DE MIDDLEWARES
+app.use(cors()); // AGREGADO: Permite que el front hable con el back
 app.use(express.json());
+app.use(express.static('public')); // AGREGADO: Para que Render sirva tu index.html
 
 // Conexión a la base de datos de Neon
 const pool = new Pool({
@@ -24,19 +29,11 @@ app.get('/prueba', async (req, res) => {
   }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Servidor encendido en http://localhost:${PORT}`);
-  console.log(`🔗 Prueba la conexión en: http://localhost:${PORT}/prueba`);
-});
-
-// Ruta para registrar un nuevo cliente (Ajustada a tu base de datos)
+// Ruta para registrar un nuevo cliente
 app.post('/registrar', async (req, res) => {
-    // Extraemos 'localidad' que es como se llama en tu tabla
     const { nombre, dni, localidad } = req.body; 
 
     try {
-        // La consulta SQL ahora usa los nombres exactos de tus columnas
         const query = 'INSERT INTO clientes (nombre, dni, localidad) VALUES ($1, $2, $3) RETURNING *';
         const values = [nombre, dni, localidad];
         
@@ -50,4 +47,9 @@ app.post('/registrar', async (req, res) => {
         console.error(err);
         res.status(500).json({ error: "Error al registrar cliente", detalle: err.message });
     }
+});
+
+const PORT = process.env.PORT || 3000; // AJUSTADO: Render usa su propio puerto
+app.listen(PORT, () => {
+  console.log(`✅ Servidor encendido en puerto ${PORT}`);
 });
